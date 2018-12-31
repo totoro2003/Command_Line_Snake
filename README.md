@@ -18,7 +18,7 @@ Yopu know, when you look at everything with rose coloured glasses, all the red f
 
 I came up with the quote, "the moon shines brightest among the darkest nights", but a few weeks later i find "the stars shine brightest in the darkest night" or something around those lines. Now, if i try to tell someone i made up that quote, since it was already a thing, they wont believe me! I hate that, but what can you do?
 
-C++ is a fun little thng i think. Its like c# but better
+C++ is a fun little thng i think. Its like java but better
 
 
 i can type shit. look-
