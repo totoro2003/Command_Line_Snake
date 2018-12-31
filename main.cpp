@@ -7,22 +7,36 @@
 #include "console.h"
 #include "snake_part.h"
 
+//overloading the == operator
+//for the COORD so that STD::find
+//works correctly
+
 bool operator==(COORD a, COORD b)
 {
     return a.X == b.X && a.Y == b.Y;
 }
 
-void end_game(int score)
+void end_game(int score, int collumn_amount, int row_amount)
 {
     system("CLS");
+
     std::string text = "Score: " + std::to_string(score);
+
     console console_window;
+
     COORD middle_coordinates;
-    middle_coordinates.X = (console_window.get_collumn_amount() / 2) - text.size() / 2;
+
+    middle_coordinates.X = console_window.get_collumn_amount() / 2 - text.size() / 2;
+
     middle_coordinates.Y = console_window.get_row_amount() / 2;
+
+    //the cursor is set in the middle of the screen
     SetConsoleCursorPosition(console_window.get_handle(), middle_coordinates);
+
     std::cout << text;
-    getchar();
+
+    getch();
+
     exit(0);
 }
 
@@ -41,13 +55,19 @@ int main()
 
     console_window.draw_console(console_width, console_height);
 
+    const int collumn_amount = console_window.get_collumn_amount();
+
+    const int row_amount = console_window.get_row_amount();
+
     //game loop
 
     bool game = true;
 
     COORD head_coordinates;
-    head_coordinates.X = console_window.get_collumn_amount() / 2;
-    head_coordinates.Y = console_window.get_row_amount() / 2;
+
+    head_coordinates.X = collumn_amount / 2;
+
+    head_coordinates.Y = row_amount / 2;
 
     //default direction is up
 
@@ -55,23 +75,48 @@ int main()
 
     int increase_by = -1;
 
+    //the game starts with 5 body parts
     int body_part_amount = 5;
 
     std::vector<COORD> head_positions;
 
     COORD food_coordinates;
-    food_coordinates.X = rand() % console_window.get_collumn_amount();
-    food_coordinates.Y = rand() % console_window.get_row_amount();
+
+    food_coordinates.X = rand() % collumn_amount;
+
+    food_coordinates.Y = rand() % row_amount;
 
     while (game)
     {
+        const int impalpable_body_parts = 3;
+        //the first 3 body parts are impossible to touch
+        if
+            (
+                //checks if you touch the barriers
+                (
+                    head_coordinates.X < 0 || head_coordinates.Y < 0
+                )
+
+                ||
+
+                (
+                    head_coordinates.X >= console_window.get_collumn_amount()
+                    ||
+                    head_coordinates.Y >= console_window.get_row_amount()
+                )
+            )
+        {
+            //..the game ends
+            end_game(body_part_amount, collumn_amount, row_amount);
+        }
+
         //drawing snake head
 
-        snake_part head(console_handle);
+        snake_part head(&console_handle);
 
         head.set_position(&head_coordinates);
 
-        std::cout << head_positions.size();
+        std::cout << "Score: " << head_positions.size() << " -BOUNDARY-\n";
 
         *direction += increase_by;
 
@@ -84,9 +129,15 @@ int main()
 
         for (int iter = head_positions.size() - 1; iter > 0; iter--)
         {
-            snake_part newest_snake_part(console_handle);
+            snake_part newest_snake_part(&console_handle);
 
-            newest_snake_part.set_position(head_positions[iter]);
+            newest_snake_part.set_position(&head_positions[iter]);
+
+            //if the snake touches itself, the game ends
+            if (head_positions[iter] == head_coordinates)
+            {
+                end_game(body_part_amount, collumn_amount, row_amount);
+            }
 
             newest_snake_part.draw();
         }
@@ -151,42 +202,16 @@ int main()
         if (head_coordinates == food_coordinates)
         {
             body_part_amount++;
-            food_coordinates.X = rand() % console_window.get_collumn_amount();
-            food_coordinates.Y = rand() % console_window.get_row_amount();
+            food_coordinates.X = rand() % collumn_amount;
+            food_coordinates.Y = rand() % row_amount;
         }
 
-        //all endgame scenarios are in separate if statements
-        //to avoid one really big if statement
-        if
-            (
-                //if you run into yourself..
-                (
-                    std::find
-                    (
-                        head_positions.begin() + 1,
-                        head_positions.end(),
-                        head_coordinates
-                    ) != head_positions.end()
-                )
 
-                || //..or you touch the left or top barrier..
 
-                (
-                    head_coordinates.X <= 0 || head_coordinates.Y <= 0
-                )
+        const int one_second = 1000;
 
-                || //..or you touch the right or bottom barrier..
+        Sleep(one_second/fps);
 
-                (
-                    head_coordinates.X >= console_window.get_collumn_amount() || head_coordinates.Y >= console_window.get_row_amount()
-                )
-            )
-        {
-            //..the game ends
-            end_game(body_part_amount);
-        }
-
-        Sleep(1000/fps);
         system("CLS");
     }
 
