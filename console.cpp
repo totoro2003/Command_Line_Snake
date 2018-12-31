@@ -27,7 +27,18 @@ int console::get_collumn_amount()
 
 void console::draw_console(int width, int height)
 {
-    MoveWindow(console_hwnd, console_rect.left, console_rect.top, width, height, true);
+    int resolution_x = GetSystemMetrics(SM_CXSCREEN);
+    int resolution_y = GetSystemMetrics(SM_CYSCREEN);
+    MoveWindow
+    (
+        console_hwnd,
+        //center screen
+        (resolution_x/2) - width/2,
+        (resolution_y/2) - height/2,
+        width,
+        height,
+        true
+    );
 }
 
 HANDLE console::get_handle()
